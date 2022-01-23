@@ -35,6 +35,30 @@ func MapMenu(menu entity.Menu) model.GetAllMenuResponse {
 	return response
 }
 
+func MapMenuProfile(menu entity.Menu, permission_id map[int]bool) model.GetAllMenuResponse {
+	response := model.GetAllMenuResponse{}
+	if permission_id[int(*menu.PermissionID)] {
+		response.ID = menu.ID
+		response.Position = menu.Position
+		response.ParentID = menu.ParentID
+		response.Name = menu.Name
+		response.Url = menu.Url
+		response.IsActive = menu.IsActive
+		response.Icon = menu.Icon
+		response.Description = menu.Description
+
+		response_sub := []model.GetAllMenuResponse{}
+
+		for _, sub_menu := range menu.SubMenu {
+			if MapMenuProfile(sub_menu, permission_id).ID != 0 {
+				response_sub = append(response_sub, MapMenuProfile(sub_menu, permission_id))
+			}
+		}
+		response.SubMenu = response_sub
+	}
+	return response
+}
+
 func (service *menuServiceImpl) List() ([]model.GetAllMenuResponse, error) {
 	//get data menu
 	menus := service.repository.FindAll()

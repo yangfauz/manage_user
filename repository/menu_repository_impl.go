@@ -26,6 +26,16 @@ func (repository *menuRepositoryImpl) FindAll() (menus []entity.Menu) {
 	return menus
 }
 
+func (repository *menuRepositoryImpl) FindByPermissionId(permission_id []int) (menus []entity.Menu) {
+	err := repository.database.Preload("SubMenu", "permission_id IN (?)", permission_id).Preload("SubMenu."+clause.Associations).Where("parent_id IS NULL").Where("permission_id IN (?)", permission_id).Find(&menus).Error
+
+	if err != nil {
+		panic(err)
+	}
+
+	return menus
+}
+
 func (repository *menuRepositoryImpl) FindById(id int) (entity.Menu, error) {
 	var menu entity.Menu
 

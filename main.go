@@ -31,7 +31,7 @@ func main() {
 	// Setup Service
 	authService := service.NewAuthService(&userRepository)
 	userService := service.NewUserService(&userRepository)
-	profileService := service.NewProfileService(&userRepository)
+	profileService := service.NewProfileService(&userRepository, &menuRepository)
 	assignService := service.NewAssignService(&userRepository, &roleRepository)
 	roleService := service.NewRoleService(&roleRepository)
 	permissionService := service.NewPermissionService(&permissionRepository)

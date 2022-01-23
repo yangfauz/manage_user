@@ -6,4 +6,5 @@ type ProfileService interface {
 	ProfileDetail(user_id int) (model.GetUserResponse, error)
 	ProfileRole(user_id int) ([]model.GetRoleResponse, error)
 	ProfilePermission(user_id int) ([]model.GetPermissionResponse, error)
+	ProfileMenu(user_id int) ([]model.GetAllMenuResponse, error)
 }

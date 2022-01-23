@@ -7,10 +7,14 @@ import (
 
 type profileServiceImpl struct {
 	repositoryUser repository.UserRepository
+	repositoryMenu repository.MenuRepository
 }
 
-func NewProfileService(userRepository *repository.UserRepository) ProfileService {
-	return &profileServiceImpl{*userRepository}
+func NewProfileService(userRepository *repository.UserRepository, menuRepository *repository.MenuRepository) ProfileService {
+	return &profileServiceImpl{
+		*userRepository,
+		*menuRepository,
+	}
 }
 
 func (service *profileServiceImpl) ProfileDetail(user_id int) (model.GetUserResponse, error) {
@@ -86,4 +90,41 @@ func (service *profileServiceImpl) ProfilePermission(user_id int) ([]model.GetPe
 	}
 
 	return responses_permission, nil
+}
+
+func (service *profileServiceImpl) ProfileMenu(user_id int) ([]model.GetAllMenuResponse, error) {
+	user, err := service.repositoryUser.FindById(user_id)
+
+	if err != nil {
+		return []model.GetAllMenuResponse{}, err
+	}
+
+	responses_role := []model.GetRoleResponse{}
+	responses_permission := []int{}
+	responses_permission_map := map[int]bool{}
+	responses_permission_map = make(map[int]bool)
+	for _, role := range user.Role {
+		response_role := model.GetRoleResponse{}
+		response_role.ID = role.ID
+		response_role.Name = role.Name
+
+		responses_role = append(responses_role, response_role)
+
+		for _, permission := range role.Permission {
+			responses_permission_map[int(permission.ID)] = true
+			responses_permission = append(responses_permission, int(permission.ID))
+		}
+	}
+
+	//get data menu
+	menus := service.repositoryMenu.FindByPermissionId(responses_permission)
+
+	//mapping response
+	responses := []model.GetAllMenuResponse{}
+
+	for _, menu := range menus {
+		responses = append(responses, MapMenuProfile(menu, responses_permission_map))
+	}
+
+	return responses, nil
 }
